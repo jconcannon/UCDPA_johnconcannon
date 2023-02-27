@@ -1,1 +1,51 @@
+import pandas as pd
+import numpy as np
 
+from scipy.stats import chi2_contingency
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+
+import matplotlib
+import seaborn as sns
+import matplotlib.pyplot as plt
+df = pd.read_csv (r'C:\Users\jconc\Documents\data analytics\database.csv')
+
+print (df)
+
+display(df)
+
+df.columns
+
+print(df.describe())
+
+df['Incident'].sum()
+
+thislist= ['Record ID', 'Agency Code', 'Agency Name', 'Agency Type', 'City',
+       'State', 'Year', 'Month', 'Incident', 'Crime Type', 'Crime Solved',
+       'Victim Sex', 'Victim Age', 'Victim Race', 'Victim Ethnicity',
+       'Perpetrator Sex', 'Perpetrator Age', 'Perpetrator Race',
+       'Perpetrator Ethnicity', 'Relationship', 'Weapon', 'Victim Count',
+       'Perpetrator Count', 'Record Source']
+thislist[-16] = "Homicides"
+print(thislist)
+
+import pandas as pd
+import matplotlib.pyplot as plt
+df = pd.read_csv (r'C:\Users\jconc\Documents\data analytics\database.csv')
+df.plot()
+plt.show()
+
+import pandas as pd
+import matplotlib.pyplot as plt
+df = pd.read_csv (r'C:\Users\jconc\Documents\data analytics\database.csv')
+df.plot(kind = 'bar', x= 'State', y= 'Incident')
+plt.show()
+
+import requests
+import pandas as pd
+homicides = requests.get('https://oag.ca.gov/sites/all/files/agweb/pdfs/cjsc/publications/homicide/hm10/preface.pdf')
+pd.DataFrame(homicides.json()).head()
+
+Hom2012 = requests.get('https://oag.ca.gov/sites/all/files/agweb/pdfs/cjsc/publications/homicide/hm10/preface.pdf')
+Hom2012 = Hom2012.json()
+pd.DataFrame(Hom2012).head()
