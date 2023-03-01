@@ -1,3 +1,4 @@
+# Importing panda and other visualisation tools. Importing file of Homicide data
 import pandas as pd
 import numpy as np
 
@@ -8,18 +9,31 @@ from statsmodels.formula.api import ols
 import matplotlib
 import seaborn as sns
 import matplotlib.pyplot as plt
-df = pd.read_csv (r'C:\Users\jconc\Documents\data analytics\database.csv')
 
+df = pd.read_csv (r'C:\Users\jconc\Documents\data analytics\database.csv')
 print (df)
 
+# Using Display(df) to display the data in a tabular format to look at the different headers and data attributes
 display(df)
 
+# Using.head to display the first five rows of the dataframe
+import pandas as pd
+database = pd.read_csv(r'C:\Users\jconc\Documents\data analytics\database.csv')
+print(database.head())
+
+# Using.info to inspect the dataframe
+print(database.info())
+
+# Use of df.columns to view list of columns to help analyze which ones could form basis of useful analysis
 df.columns
 
-print(df.describe())
-
+# Quick analysis of sum of incidents to understand total number of homicides
 df['Incident'].sum()
 
+# Using df.describe function to Generate descriptive statistics
+print(df.describe())
+
+# Creating a list of columns with a view to excluding some columns or renaming as appropriate
 thislist= ['Record ID', 'Agency Code', 'Agency Name', 'Agency Type', 'City',
        'State', 'Year', 'Month', 'Incident', 'Crime Type', 'Crime Solved',
        'Victim Sex', 'Victim Age', 'Victim Race', 'Victim Ethnicity',
@@ -38,14 +52,17 @@ plt.show()
 import pandas as pd
 import matplotlib.pyplot as plt
 df = pd.read_csv (r'C:\Users\jconc\Documents\data analytics\database.csv')
-df.plot(kind = 'bar', x= 'State', y= 'Incident')
+df.plot(kind = 'scatter', x = 'Year', y = 'Perpetrator Count')
 plt.show()
 
+import pandas as pd
+import matplotlib.pyplot as plt
+df = pd.read_csv (r'C:\Users\jconc\Documents\data analytics\database.csv')
+df.plot(kind = 'scatter', x = 'Crime Type', y = 'Victim Sex')
+plt.show()
+
+# Pulling in Data from website to analyze reasons for peak of homicides in Year 1993
 import requests
 import pandas as pd
-homicides = requests.get('https://oag.ca.gov/sites/all/files/agweb/pdfs/cjsc/publications/homicide/hm10/preface.pdf')
+homicides = requests.get('https://www.aei.org/carpe-diem/chart-of-the-day-more-guns-less-gun-violence-between-1993-and-2013/')
 pd.DataFrame(homicides.json()).head()
-
-Hom2012 = requests.get('https://oag.ca.gov/sites/all/files/agweb/pdfs/cjsc/publications/homicide/hm10/preface.pdf')
-Hom2012 = Hom2012.json()
-pd.DataFrame(Hom2012).head()
