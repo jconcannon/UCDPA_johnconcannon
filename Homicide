@@ -1,3 +1,4 @@
+Importing the Data
 # Importing panda and other visualisation tools. Importing file of Homicide data
 import pandas as pd
 import numpy as np
@@ -9,10 +10,15 @@ from statsmodels.formula.api import ols
 import matplotlib
 import seaborn as sns
 import matplotlib.pyplot as plt
+from IPython.display import display, HTML
+import pandas as pd
+import numpy as np
+from sklearn import datasets
 
 df = pd.read_csv (r'C:\Users\jconc\Documents\data analytics\database.csv')
 print (df)
 
+General Data Analysis
 # Using Display(df) to display the data in a tabular format to look at the different headers and data attributes
 display(df)
 
@@ -21,17 +27,26 @@ import pandas as pd
 database = pd.read_csv(r'C:\Users\jconc\Documents\data analytics\database.csv')
 print(database.head())
 
-# Using.info to inspect the dataframe
+# Using.info to inspect the dataframe to identify columns and data types (numeric or non numeric)
 print(database.info())
 
 # Use of df.columns to view list of columns to help analyze which ones could form basis of useful analysis
 df.columns
 
-# Quick analysis of sum of incidents to understand total number of homicides
-df['Incident'].sum()
+# Quick analysis of sum of incidents to understand total number of Homicide Incidents
+df['Incident'].count()
 
-# Using df.describe function to Generate descriptive statistics
-print(df.describe())
+# Analyzing further to understand the breakdown of Crime Types
+df['Crime Type'].value_counts()
+
+# Examining dataset for any blank values (all cells are populated but some have unknown or zero values which requires further analysis)
+database.isnull().sum()
+
+# applying filter function 
+df.filter(["State = California", "Weapon", "Victim Sex"])
+
+# applying filter function with more columns
+df.filter(["Incident", "State", "Perpetrator Sex", "Perpetrator Race", "Perpetrator Age", "Victim Race", "Victim Age", "Victim Sex", "Weapon"])
 
 # Creating a list of columns with a view to excluding some columns or renaming as appropriate
 thislist= ['Record ID', 'Agency Code', 'Agency Name', 'Agency Type', 'City',
@@ -43,26 +58,342 @@ thislist= ['Record ID', 'Agency Code', 'Agency Name', 'Agency Type', 'City',
 thislist[-16] = "Homicides"
 print(thislist)
 
+# Plotting Datafrane
 import pandas as pd
 import matplotlib.pyplot as plt
 df = pd.read_csv (r'C:\Users\jconc\Documents\data analytics\database.csv')
 df.plot()
 plt.show()
 
+# Merging Data Frames example
 import pandas as pd
+df = pd.DataFrame({'State': ["california","texas","new york","florida"],
+                    'Amount' : [98961,61003,49118,35481]})
+
+df1 = pd.DataFrame({'Race': ["black","white","asian","native american"],
+                    'Amount': [211958,212026,5944,3484]})
+
+# Using pandas.concat() to concat two DataFrames
+data = [df, df1]
+df2 = pd.concat(data)
+print(df2)
+
+# Dictionary Example
+dic = {"Gun":["Handgun","Firearm","Shotgun","Rifle"]}
+for a,b in dic.items():
+    for z in b:
+        database.Weapon = database.Weapon.apply(lambda x: x.replace(z,a))
+        
+# Test to see if now combined
+database['Weapon'].value_counts()
+
+# Using loc methods to return a series. In this case sample incident from 1993.
+States.loc[267391]
+
+# Passing a list of Boolean values to a DataFrame indicating which rows should be retained (True) and which should be filtered (False).
+# In this case i am looking for number of incidents greater than one to identify Incidents where there were multiple victims.
+States["Incident"] > 1
+
+# Sorted list by Incident number. This number seems too high. Also identifies Crime Types as Murder or Manslughter but with 0 Incident value which also seems to be an error in the data
+States.sort_values(by = "Incident" , ascending = False)
+
+# This list can be passed directly to the DataFrame to perform a filter: Here we show Victim Count Greater than 1
+multiplehomicide_states = States[States["Incident"] > 1]
+display(multiplehomicide_states)
+
+# Filtering a list of results. Snapshot of some California Data
+States[267391:267396]
+
+# Passing a list of Boolean values to a DataFrame indicating which rows should be retained (True) and which should be filtered (False). This time by Victim Age.
+States["Victim Age"] <18
+
+# Sorted list by Victim Age number.
+States.sort_values(by = "Victim Age" , ascending = True)
+
+# Filter of Victim Ages
+database.filter(["Victim Age"])
+
+# Assigning Ages to Groups
+X_train_data = pd.DataFrame({'Victim Age':[0,18,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,776,77,78,78,80,81,82,83,84,85,86,87,88,89,90]})
+
+bins= [1, 18, 31, 41, 51, 61, 71, 81, 90]
+labels = ['0-17', '18-30', '31-40', '41-50', '51-60', '61-70', '71-80', '81-90']
+X_train_data['VictimAgeGroup'] = pd.cut(X_train_data['Victim Age'], bins=bins, labels=labels, right=False)
+print (X_train_data)
+
+Regression, Correlation & Descriptive Statistics
+# Using df.describe function to Generate descriptive statistics
+from IPython.display import display, HTML
+import pandas as pd
+import numpy as np
+from scipy.stats import chi2_contingency
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+import matplotlib
+import seaborn as sns
 import matplotlib.pyplot as plt
-df = pd.read_csv (r'C:\Users\jconc\Documents\data analytics\database.csv')
-df.plot(kind = 'scatter', x = 'Year', y = 'Perpetrator Count')
-plt.show()
+%matplotlib inline
+display(df.select_dtypes(include=[np.number]).describe())
+
+# Using df.describe function to Generate Correlation statistics
+df.corr()
+
+# Generating Correlation Heatmap
+HM = sns.heatmap(
+    corrMatrix, 
+    vmin=-1, vmax=1, center=0,
+    cmap=sns.diverging_palette(20, 220, n=200),
+    square=True,
+    annot=True
+)
+HM.set_xticklabels(
+    HM.get_xticklabels(),
+    rotation=45,
+    horizontalalignment='right'
+);
+
+# Running a Scatter Plot to See if there is any correlation between variables. In this Case Incident and Year.
+df.plot.scatter("Incident", "Year", \
+                        figsize = (8, 8))
+                        
+ # Running a regression Test on these 2 Variables.
+X = df[['Incident']]
+Y = df["Year"]
+X = sm.add_constant(X)
+
+model = sm.OLS(Y, X)
+results = model.fit()
+print(results.summary())
+
+# Running Scatter plot to test 2 of the other variables for comparison, perpetrator and year
+df.plot.scatter("Perpetrator Count", "Year", \
+                        figsize = (8, 8))
+                        
+# Running a regression Test on these 2 Variables.
+X = df[['Perpetrator Count']]
+Y = df["Year"]
+X = sm.add_constant(X)
+
+# Running Regression on this also
+model = sm.OLS(Y, X)
+results = model.fit()
+print(results.summary())
+
+Machine Learning
+# Machine Learning to Predict Target Variable
+import os
+import subprocess
+from IPython.display import display, HTML, Image
+import io
+​
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+​
+from sklearn.tree import export_graphviz
+from sklearn import tree
+from sklearn import metrics
+from sklearn import tree
+from sklearn import svm
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import train_test_split
+from sklearn import ensemble
+from sklearn import linear_model
+from sklearn import neighbors
+from sklearn.feature_selection import SelectKBest
+​
+from operator import itemgetter
+​
+%matplotlib inline
 
 import pandas as pd
+database = pd.read_csv(r'C:\Users\jconc\Documents\data analytics\database.csv')
+print(database.head())
+
+display(database.select_dtypes(include=[np.number]).describe().transpose())
+display(database.select_dtypes(include=[np.object]).describe().transpose())
+
+#Examine the distribution amongst the various classes
+database["Victim Sex"].value_counts()
+
+# Identifying Relationship Types in an array
+database['Relationship'].unique()
+
+database["Relationship"].value_counts()
+
+database["State"].value_counts()
+
+database["Year"].value_counts()
+
+database["Crime Solved"].value_counts()
+
+#Isolate the descriptive features we are interested in
+X = database[['Record ID', 'Agency Code', 'Agency Name', 'Agency Type', 'City',
+       'State', 'Year', 'Month', 'Incident', 'Crime Type', 'Crime Solved',
+       'Victim Sex', 'Victim Age', 'Victim Race', 'Victim Ethnicity',
+       'Perpetrator Sex', 'Perpetrator Age', 'Perpetrator Race',
+       'Perpetrator Ethnicity', 'Relationship', 'Weapon', 'Victim Count',
+       'Perpetrator Count']]
+Y = database["Incident"]
+
+# Split the data into a training set, a vaidation set, and a test set
+X_train_plus_valid, X_test, y_train_plus_valid, y_test \
+    = train_test_split(X, Y, random_state=0, \
+                                    train_size = 0.7)
+
+X_train, X_valid, y_train, y_valid \
+    = train_test_split(X_train_plus_valid, \
+                                        y_train_plus_valid, \
+                                        random_state=0, \
+                                        train_size = 0.5/0.7)
+                                        
+  # Training a decision Tree
+my_tree = tree.DecisionTreeClassifier(criterion="Incident")
+my_tree.fit(X_train,y_train)
+my_tree_fit=my_tree.fit(X_train,y_train)
+
+# Make a set of predictions for the training data
+y_pred = my_best_tree.predict(X_test)
+
+# Print performance details
+print(metrics.classification_report(y_test, y_pred))
+
+# Print confusion matrix
+print("Confusion Matrix")
+pd.crosstab(y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True)
+
+#Evaluating Model Performance
+# Make a set of predictions for the training data
+y_pred = my_tree.predict(X_train)
+
+# Print performance details
+accuracy = metrics.accuracy_score(y_train, y_pred) # , normalize=True, sample_weight=None
+print("Accuracy: " +  str(accuracy))
+print(metrics.classification_report(y_train, y_pred))
+
+# Print confusion matrix
+print(metrics.confusion_matrix(y_train, y_pred))
+
+# Print nicer homemade confusion matrix
+print("Confusion Matrix")
+pd.crosstab(y_train, y_pred, rownames=['True'], colnames=['Predicted'], margins=True)
+
+#Clustering. Import Packages
+import pandas as pd
+import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
-df = pd.read_csv (r'C:\Users\jconc\Documents\data analytics\database.csv')
-df.plot(kind = 'scatter', x = 'Crime Type', y = 'Victim Sex')
+%matplotlib inline
+plt.style.use('ggplot')
+
+from sklearn import metrics
+from sklearn.cluster import KMeans
+from sklearn.cluster import AgglomerativeClustering
+from scipy.cluster.hierarchy import dendrogram, linkage
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import mutual_info_classif
+
+#Clustering. Import New File. California subset with some null values (removed some zero values for testing purposes)
+import pandas as pd
+database = pd.read_csv(r'C:\Users\jconc\Documents\data analytics\californiav1.csv')
+print(database.head())
+
+# Print descriptive statistcs for each column
+print("Summary Stats")
+print(database.select_dtypes(include=[np.number]).describe().transpose())
+#print(database.select_dtypes(include=[np.object]).describe())
+
+# Check for presence of missing values
+print("Missing Values")
+print(database.isnull().sum())
+
+database.head()
+
+# Do some pre-processing on the data to prepare it for clustering
+# Use a range scaling to scale all variables to between 0 and 1
+cols = database.columns
+
+min_max_scaler = preprocessing.MinMaxScaler()
+min_max_scaler.fit(database)
+a = min_max_scaler.transform(database)
+
+database = pd.DataFrame(a, columns = cols) # Watch out for putting back in columns here
+database.head()
+
+# Iterate through values of k and calculate silhouette index to find best option
+silhouette_scores = list()
+max_k = 10
+k_means_iterations = 10
+
+for k in range(2, max_k+1):
+
+    kmeans = KMeans(init='k-means++', n_clusters=k, n_init=k_means_iterations)
+    kmeans.fit(database)
+    labels = kmeans.labels_
+    s = metrics.silhouette_score(database, labels, metric='euclidean')
+    silhouette_scores.append(s)
+
+plt.plot(range(2, max_k+1),silhouette_scores, linewidth=2)
+plt.ylim(0, max(silhouette_scores)*1.1)
+plt.ylabel('Silhouette')
+plt.xlabel('k')
+
+# Repeat best clustering and look at descriptive statistics for varaibles
+best_k = silhouette_scores.index(max(silhouette_scores)) + 2
+kmeans = KMeans(init='random', n_clusters=best_k, n_init=k_means_iterations)
+kmeans.fit(database)
+centroids = kmeans.cluster_centers_
+labels = kmeans.labels_
+C_dist = kmeans.inertia_
+# append the lcustering to the dataset
+database["Cluster"] = labels
+database["C_Dist"] = C_dist
+database.head()
+
+database.to_csv('Out.csv')
+
+Data Visualisations
+# Data Visualisation 1. Charting Number and percentage of Crime solved/not solved.
+crimes_solved_not = pd.DataFrame(database['Crime Solved'].value_counts(normalize=True)*100)
+ax = sns.barplot(data=crimes_solved_not, x=crimes_solved_not.index, y='Crime Solved')
+for p in ax.patches:
+                _x = p.get_x() + p.get_width() / 2
+                _y = p.get_y() + p.get_height() + (p.get_height()*0.01)
+                value = '{:.1f}%'.format(p.get_height())
+                ax.text(_x, _y, value, ha="center") 
+plt.ylabel('Crime Solved [%]')
+plt.title('Crime Solved vs. Unsolved')
 plt.show()
 
-# Pulling in Data from website to analyze reasons for peak of homicides in Year 1993
+# Data Visualisation 2. Charting Crime Solved by Victim Race
+crimes_solved_not = pd.DataFrame(database['Victim Race'].value_counts(normalize=True)*100)
+ax = sns.lineplot(data=crimes_solved_not, x=crimes_solved_not.index, y='Victim Race')
+for p in ax.patches:
+                _x = p.get_x() + p.get_width() / 2
+                _y = p.get_y() + p.get_height() + (p.get_height()*0.01)
+                value = '{:.1f}%'.format(p.get_height())
+                ax.text(_x, _y, value, ha="center") 
+plt.ylabel('Crime Solved [%]')
+plt.title('Crime Solved vs. Unsolved')
+plt.show()
+
+# Data Visualisations 3
+ct  = pd.crosstab(database["Year"], database["State"],normalize='columns')
+plt.figure(figsize=(16,8))
+sns.heatmap(ct,cmap="inferno")
+plt.title("Homicide records by State per Year")
+plt.show()
+
+API
+# API access to a remote json data set.import requests. Test to pull in Homicide data via API
+import pandas as pd
 import requests
-import pandas as pd
-homicides = requests.get('https://www.aei.org/carpe-diem/chart-of-the-day-more-guns-less-gun-violence-between-1993-and-2013/')
-pd.DataFrame(homicides.json()).head()
+import matplotlib.pyplot as plt
+import time
+plt.style.use('seaborn')
+requests.get('https://data.montgomerycountymd.gov/api/views/icn6-v9z3/rows.json?accessType=DOWNLOAD')
+
+rows = requests.get('https://data.montgomerycountymd.gov/api/views/icn6-v9z3/rows.json?accessType=DOWNLOAD')
+
+rows.json()
